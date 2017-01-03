@@ -25,16 +25,16 @@ Scheduler runner;
 void CallbackTime() {
     DynamicJsonBuffer jsonBuffer;
     HTTPClient http;
-    http.begin("http://www.venusz.tk/");
+    http.begin("http://192.168.1.37/time.php");
     int httpCode = http.GET();
         if(httpCode > 0) {
             if(httpCode == HTTP_CODE_OK) {
                 JsonObject& root = jsonBuffer.parseObject(http.getString());
-                String H = root[String("h")];
-                String m = root[String("m")];
-                String s = root[String("s")];
+                String DayOfWeek = root[String("DayOfWeek")];
+                String Hour = root[String("Hour")];
+                String Minute = root[String("Minute")];
                 lcd.setCursor(0, 0);
-                lcd.print(H + ":" + m + ":" + s);
+                lcd.print(DayOfWeek + ":" + Hour + ":" + Minute);
             }
         }
     http.end();
@@ -43,22 +43,40 @@ void CallbackTime() {
 void CallbackSwitch() {
     DynamicJsonBuffer jsonBuffer;
     HTTPClient http;
-    http.begin("http://www.venusz.tk/");
+    http.begin("http://192.168.1.36/time.php");
     int httpCode = http.GET();
         if(httpCode > 0) {
             if(httpCode == HTTP_CODE_OK) {
                 JsonObject& root = jsonBuffer.parseObject(http.getString());
-                String H = root[String("h")];
-                String m = root[String("m")];
-                String s = root[String("s")];
+                String DayOfWeek = root[String("DayOfWeek")];
+                String Hour = root[String("Hour")];
+                String Minute = root[String("Minute")];
                 lcd.setCursor(0, 0);
-                lcd.print(H + ":" + m + ":" + s);
+                lcd.print(DayOfWeek + ":" + Hour + ":" + Minute);
+                Serial.println(DayOfWeek + ":" + Hour + ":" + Minute);
+                bool isON = Firebase.getBool("Timers/"+ Hour + ":" + Minute +"/Active");
+                if (!Firebase.failed()) {
+                    Serial.println(isON);
+                    if(isON){
+                        lcd.setCursor(0, 1);
+                        lcd.print("123456");
+                        Firebase.setBool("Controllers/SW-1", Firebase.getBool("Timers/"+ Hour + ":" + Minute +"/SW/0"));
+                        delay(200);
+                        Firebase.setBool("Controllers/SW-2", Firebase.getBool("Timers/"+ Hour + ":" + Minute +"/SW/1"));
+                        delay(200);
+                        Firebase.setBool("Controllers/SW-3", Firebase.getBool("Timers/"+ Hour + ":" + Minute +"/SW/2"));
+                        delay(200);
+                        Firebase.setBool("Controllers/SW-4", Firebase.getBool("Timers/"+ Hour + ":" + Minute +"/SW/3"));
+                        delay(200);
+                    }
+                }
             }
         }
     http.end();
 }
 
 void setup() {
+    Serial.begin(9600);
     lcd.begin();
     lcd.backlight();
     pinMode(LED_BUILTIN, OUTPUT);

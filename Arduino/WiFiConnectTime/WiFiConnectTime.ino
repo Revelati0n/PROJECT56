@@ -36,14 +36,15 @@ void setup() {
 void loop() {
     DynamicJsonBuffer jsonBuffer;
     HTTPClient http;
-    http.begin("http://www.venusz.tk/");
+    // http.begin("http://www.venusz.tk/");
+    http.begin("http://192.168.1.37/time.php");
     int httpCode = http.GET();
         if(httpCode > 0) {
             if(httpCode == HTTP_CODE_OK) {
                 JsonObject& root = jsonBuffer.parseObject(http.getString());
-                String H = root[String("h")];
-                String m = root[String("m")];
-                String s = root[String("\ns")];
+                String H = root[String("DayOfWeek")];
+                String m = root[String("Hour")];
+                String s = root[String("Minute")];
                 lcd.setCursor(0, 0);
                 lcd.print(H + ":" + m + ":" + s);
             }
@@ -51,4 +52,3 @@ void loop() {
     http.end();
     delay(500);
 }
-
