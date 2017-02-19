@@ -9,11 +9,23 @@
 #define WIFI_SSID "lol"
 #define WIFI_PASSWORD "021732273"
 
+int SW_PIN1 = 5; //D1
+int SW_PIN2 = 4; //D2
+int SW_PIN3 = 0; //D3
+int SW_PIN4 = 2; //D4
+
+int IN_PIN1 = 3; //D9
+int IN_PIN2 = 1; //D10
+
 void setup() {
     Serial.begin(9600);
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(12, OUTPUT);
-    pinMode(14, OUTPUT);
+    pinMode(SW_PIN1, OUTPUT);
+    pinMode(SW_PIN2, OUTPUT);
+    pinMode(SW_PIN3, OUTPUT);
+    pinMode(SW_PIN4, OUTPUT);
+    pinMode(IN_PIN1, INPUT);
+    pinMode(IN_PIN2, INPUT);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED) {
         digitalWrite(LED_BUILTIN, LOW);
@@ -27,7 +39,7 @@ void setup() {
 void loop() {
     DynamicJsonBuffer jsonBuffer;
     HTTPClient http;
-    http.begin("http://192.168.1.35/time.php");
+    http.begin("http://192.168.1.36/time.php");
     int httpCode = http.GET();
         if(httpCode > 0) {
             if(httpCode == HTTP_CODE_OK) {
@@ -53,17 +65,42 @@ void loop() {
             }
         }
     http.end();
-    delay(2000);
-    if(Firebase.getBool("Controllers/SW-1") == true){
-      digitalWrite(12, LOW);
+
+    delay(1000);
+
+    if(digitalRead(IN_PIN1) == HIGH){
+        Firebase.setBool("Alert/PIN-1", true);
     }else{
-      digitalWrite(12, HIGH);
+        Firebase.setBool("Alert/PIN-1", false);
+    }
+
+    if(digitalRead(IN_PIN2) == HIGH){
+        Firebase.setBool("Alert/PIN-2", true);
+    }else{
+        Firebase.setBool("Alert/PIN-2", false);
+    }
+
+    if(Firebase.getBool("Controllers/SW-1") == true){
+      digitalWrite(SW_PIN1, LOW);
+    }else{
+      digitalWrite(SW_PIN1, HIGH);
     }
     if(Firebase.getBool("Controllers/SW-2") == true){
-      digitalWrite(14, LOW);
+      digitalWrite(SW_PIN2, LOW);
     }else{
-      digitalWrite(14, HIGH);
+      digitalWrite(SW_PIN2, HIGH);
     }
-    delay(2000);
-}
+    if(Firebase.getBool("Controllers/SW-3") == true){
+      digitalWrite(SW_PIN3, LOW);
+    }else{
+      digitalWrite(SW_PIN3, HIGH);
+    }
+    if(Firebase.getBool("Controllers/SW-4") == true){
+      digitalWrite(SW_PIN4, LOW);
+    }else{
+      digitalWrite(SW_PIN4, HIGH);
+    }
 
+    delay(1000);
+
+}
